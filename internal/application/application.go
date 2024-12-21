@@ -4,26 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-)
-
-package application
-
-import (
-"bufio"
-"encoding/json"
-"errors"
-"fmt"
-"log"
-"net/http"
-"os"
-"strings"
-
-"github.com/develslawer/webcalc/pkg/calculation"
 )
 
 type Config struct {
