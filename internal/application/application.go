@@ -1,96 +1,44 @@
 package application
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/develslawer/webcalc/pkg/calculation"
-	"log"
 	"net/http"
-	"os"
-	"strings"
 )
-
-type Config struct {
-	Addr string
-}
-
-func ConfigFromEnv() *Config {
-	config := new(Config)
-	config.Addr = os.Getenv("PORT")
-	if config.Addr == "" {
-		config.Addr = "8080"
-	}
-	return config
-}
 
 type Application struct {
 	config *Config
 }
 
-func New() *Application {
-	return &Application{
-		config: ConfigFromEnv(),
-	}
-}
-
-// Функция запуска приложения
-// тут будем чиать введенную строку и после нажатия ENTER писать результат работы программы на экране
-// если пользователь ввел exit - то останаваливаем приложение
-func (a *Application) Run() error {
-	for {
-		// читаем выражение для вычисления из командной строки
-		log.Println("input expression")
-		reader := bufio.NewReader(os.Stdin)
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			log.Println("failed to read expression from console")
-		}
-		// убираем пробелы, чтобы оставить только вычислемое выражение
-		text = strings.TrimSpace(text)
-		// выходим, если ввели команду "exit"
-		if text == "exit" {
-			log.Println("aplication was successfully closed")
-			return nil
-		}
-		//вычисляем выражение
-		result, err := calculation.Calc(text)
-		if err != nil {
-			log.Println(text, " calculation failed wit error: ", err)
-		} else {
-			log.Println(text, "=", result)
-		}
-	}
-}
-
-type Request struct {
-	Expression string `json:"expression"`
-}
-
 func CalcHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	request := new(Request)
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrResponse{ErrInvalidExpression.Error()})
 		return
 	}
 
 	result, err := calculation.Calc(request.Expression)
 	if err != nil {
-		if errors.Is(err, calculation.ErrInvalidExpression) {
-			fmt.Fprintf(w, "err: %s", err.Error())
+		if errors.Is(err, calculation.ErrInvalidExpression) || errors.Is(err, calculation.ErrDivisionByZero) ||
+			errors.Is(err, calculation.ErrUnknownOperator) || errors.Is(err, calculation.ErrStackOverflow) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrResponse{ErrInvalidExpression.Error()})
 		} else {
-			fmt.Fprintf(w, "unknown err")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(ErrResponse{ErrInternalServer.Error()})
 		}
 
 	} else {
-		fmt.Fprintf(w, "result: %f", result)
+		json.NewEncoder(w).Encode(Response{result})
 	}
 }
 
 func (a *Application) RunServer() error {
-	http.HandleFunc("/", CalcHandler)
+	http.HandleFunc("/api/v1/calculate", LoggerMiddleware(CalcHandler))
 	return http.ListenAndServe(":"+a.config.Addr, nil)
 }

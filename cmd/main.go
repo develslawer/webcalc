@@ -4,7 +4,7 @@ import "github.com/develslawer/webcalc/internal/application"
 
 func main() {
 	app := application.New()
-	err := app.Run()
+	err := app.RunServer()
 	if err != nil {
 		panic(err)
 	}

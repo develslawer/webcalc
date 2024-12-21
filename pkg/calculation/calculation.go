@@ -87,7 +87,7 @@ func Calc(expression string) (float64, error) {
 				}
 				stackOps = stackOps[:len(stackOps)-1]
 			} else {
-				for len(stackOps) > 0 && getOpPriority(stackOps[len(stackOps)-1]) >= getOpPriority(char) {
+				for len(stackOps) >= 1 && getOpPriority(stackOps[len(stackOps)-1]) >= getOpPriority(char) && len(stackValues) > 1 {
 					op := stackOps[len(stackOps)-1]
 					stackOps = stackOps[:len(stackOps)-1]
 					value1, value2 := stackValues[len(stackValues)-2], stackValues[len(stackValues)-1]
@@ -105,7 +105,6 @@ func Calc(expression string) (float64, error) {
 		}
 	}
 
-	// Выполняем оставшиеся операции
 	for len(stackOps) > 0 {
 		op := stackOps[len(stackOps)-1]
 		stackOps = stackOps[:len(stackOps)-1]

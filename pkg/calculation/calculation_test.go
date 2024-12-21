@@ -1,6 +1,7 @@
 package calculation
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -20,12 +21,14 @@ func TestCalc(t *testing.T) {
 		{"1.2 + 2.3", 3.5, nil},
 		{"-(-1+2)+7", 6, nil},
 		{"1+1", 2, nil},
+		{"1+1++", 0, ErrStackOverflow}, // broken
+		{"(1+1)/0", 0, ErrDivisionByZero},
 		{"1+1*", 0, ErrStackOverflow},
 	}
 	for _, c := range cases {
 		t.Run(c.expression, func(t *testing.T) {
 			got, err := Calc(c.expression)
-			if err != c.err {
+			if !errors.Is(err, c.err) {
 				t.Errorf("Calc(%q): err %v; want %v", c.expression, err, c.err)
 			}
 			if got != c.answer {
