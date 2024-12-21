@@ -1,4 +1,4 @@
-package calc
+package calculation
 
 import (
 	"strconv"
