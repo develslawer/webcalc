@@ -27,7 +27,7 @@ API для вычисления математических выражений 
     ```
 2. Установите зависимости
     ```bash
-    go tidy
+    go mod tidy
     ```
 3. Запуск тестов (опционально)
     ```bash
@@ -41,6 +41,13 @@ API для вычисления математических выражений 
 ---
 
 ## Как пользоваться
+### PowerShell
+```bash
+Invoke-WebRequest -Uri "http://localhost/api/v1/calculate?a=1" `
+    -Method POST `
+    -Headers @{ "Content-Type" = "application/json" } `
+    -Body '{"expression": "YOUR EXPRESSION"}'
+```
 
 Метод: POST 
 
