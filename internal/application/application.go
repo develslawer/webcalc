@@ -12,6 +12,10 @@ type Application struct {
 }
 
 func CalcHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	request := new(Request)
 	defer r.Body.Close()
