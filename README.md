@@ -41,6 +41,9 @@ API для вычисления математических выражений 
 ---
 
 ## Как пользоваться
+
+конечные точки:
+ - api/v1/calculate
 ### PowerShell
 ```bash
 Invoke-WebRequest -Uri "http://localhost/api/v1/calculate?a=1" `
