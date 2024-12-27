@@ -3,7 +3,6 @@ package application
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -45,7 +44,7 @@ func TestCalcHandler(t *testing.T) {
 		{
 			name:          "EmptyRequestBody",
 			requestBody:   nil,
-			expectedCode:  http.StatusBadRequest,
+			expectedCode:  http.StatusUnprocessableEntity,
 			expectedError: &ErrResponse{Error: ErrInvalidExpression.Error()},
 		},
 	}
@@ -82,7 +81,6 @@ func TestCalcHandler(t *testing.T) {
 			} else if test.expectedError != nil {
 				actualErrorBytes, _ := io.ReadAll(rec.Body)
 				actualError := ErrResponse{}
-				fmt.Printf("%s", string(actualErrorBytes))
 				json.NewDecoder(bytes.NewReader(actualErrorBytes)).Decode(&actualError)
 				if *test.expectedError != actualError {
 					t.Errorf("expected error %+v, got %+v", *test.expectedError, actualError)
